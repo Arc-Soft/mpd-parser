@@ -323,6 +323,8 @@ export const inheritAttributes = (mpd, options = {}) => {
     throw new Error(errors.INVALID_NUMBER_OF_PERIOD);
   }
 
+  const locations = findChildren(mpd, 'Location');
+
   const mpdAttributes = parseAttributes(mpd);
   const mpdBaseUrls = buildBaseUrls([ manifestUri ], findChildren(mpd, 'BaseURL'));
 
@@ -330,5 +332,12 @@ export const inheritAttributes = (mpd, options = {}) => {
   mpdAttributes.NOW = NOW;
   mpdAttributes.clientOffset = clientOffset;
 
-  return flatten(periods.map(toAdaptationSets(mpdAttributes, mpdBaseUrls)));
+  if (locations.length) {
+    mpdAttributes.locations = locations.map(getContent);
+  }
+
+  return {
+    locations: mpdAttributes.locations,
+    representationInfo: flatten(periods.map(toAdaptationSets(mpdAttributes, mpdBaseUrls)))
+  };
 };
